@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Bodardr.saving
+namespace Bodardr.Saving
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+    [AttributeUsage(AttributeTargets.Class)]
     public class SaveableAttribute : Attribute
     {
     }

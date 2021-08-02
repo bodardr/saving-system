@@ -1,6 +1,6 @@
 {
   "name": "com.bodardr.saving",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "displayName": "Saving System",
   "description": "Easy save system with attributes.",
   "dependencies": {},
