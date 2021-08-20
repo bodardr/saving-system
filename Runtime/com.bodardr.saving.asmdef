@@ -1,7 +1,9 @@
 {
   "name": "com.bodardr.saving",
   "rootNamespace": "Bodardr.Saving",
-  "references": [],
+  "references": [
+    "com.bodardr.databinding.runtime"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
