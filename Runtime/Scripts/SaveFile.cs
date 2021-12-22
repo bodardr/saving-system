@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -17,6 +18,8 @@ namespace Bodardr.Saving
 
         public Dictionary<Type, object> SavedEntries => savedEntries;
 
+        public SaveMetadata Metadata => metadata;
+
         public static SaveFile Load(SaveMetadata metadata)
         {
             var save = new SaveFile
@@ -28,23 +31,16 @@ namespace Bodardr.Saving
             {
                 var file = File.ReadAllText(Path.Combine(Application.persistentDataPath, metadata.Filename))
                     .Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-
-                var remainingSaveables = new List<Type>(SaveManager.saveableTypes);
-
+                
                 //Parse saveables found in file.
                 for (var i = 0; i < file.GetLength(0); i++)
                 {
                     var obj = file[i].Split(new[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
-                    var type = remainingSaveables.Find(x => x.Name == obj[0]);
-                    remainingSaveables.Remove(type);
+                    var type = Type.GetType(obj[0]);
 
                     save.SavedEntries.Add(type ?? typeof(object), JsonUtility.FromJson(obj[1], type));
                 }
-
-                //Add new saveables from missing ones (useful when converting from a previous update, for example).
-                foreach (var saveable in remainingSaveables)
-                    save.SavedEntries.Add(saveable, Activator.CreateInstance(saveable));
             }
             catch (Exception e)
             {
@@ -67,7 +63,9 @@ namespace Bodardr.Saving
             {
                 //Remove entries with extensions already in them.
                 var indexOf = filename.IndexOf('.');
-                filename = filename.Substring(0, indexOf);
+
+                if (indexOf >= 0)
+                    filename = filename.Substring(0, indexOf);
 
                 filename = string.Concat(filename, ".dat");
             }
@@ -80,38 +78,41 @@ namespace Bodardr.Saving
             };
         }
 
-        public T GetFile<T>()
+        public T GetOrCreate<T>()
         {
             var type = typeof(T);
 
-            if (SaveManager.saveableTypes.Find(x => x == type) == null)
+            var saveableAttr = type.GetCustomAttribute(typeof(SaveableAttribute));
+
+            if (saveableAttr == null)
             {
                 Debug.LogError("Type does not contain the Saveable attribute.");
                 return default;
             }
 
-            if (SavedEntries[type] != null)
+            if (SavedEntries.ContainsKey(type) && SavedEntries[type] != null)
                 return (T)SavedEntries[type];
 
-            Debug.LogError("Type was not found inside the savefile.");
-            return default;
+            T instance = Activator.CreateInstance<T>();
+            SavedEntries.Add(type, instance);
+            return instance;
         }
 
-        public void Save(string saveAs = "")
+        public void Save(string saveAs = "", bool saveThumbnail = true)
         {
             if (!string.IsNullOrEmpty(saveAs))
-                metadata.Filename = saveAs;
+                Metadata.Filename = saveAs;
 
-            metadata.Save();
+            Metadata.Save(saveThumbnail);
 
             var str = new StringBuilder();
             foreach (var entry in SavedEntries)
             {
-                str.AppendLine($"\\{entry.Key}\r");
+                str.AppendLine($"\\{entry.Key.AssemblyQualifiedName}\r");
                 str.AppendLine(JsonUtility.ToJson(entry.Value));
             }
 
-            var filePath = Path.Combine(Application.persistentDataPath, metadata.Filename);
+            var filePath = Path.Combine(Application.persistentDataPath, Metadata.Filename);
 
             FileStream saveFile;
             saveFile = File.Exists(filePath) ? File.OpenWrite(filePath) : File.Create(filePath);

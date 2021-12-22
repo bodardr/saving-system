@@ -13,28 +13,12 @@ namespace Bodardr.Saving
 
         public static List<SaveMetadata> saveMetadatas;
 
-        internal static List<Type> saveableTypes;
-
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Init()
-        {
-            saveableTypes = new List<Type>();
-            var assembly = Assembly.GetCallingAssembly();
-
-            foreach (var t in assembly.GetTypes())
-                if (t.GetCustomAttributes(typeof(SaveableAttribute), true).Length > 0)
-                {
-                    Debug.Log($"Added {t}");
-                    saveableTypes.Add(t);
-                }
-
-            LoadSavesMetadata();
-        }
-
-        private static void LoadSavesMetadata()
+        public static void LoadSavesMetadata()
         {
             var files = Directory.EnumerateFiles(Application.persistentDataPath);
 
+            saveMetadatas = new List<SaveMetadata>();
             foreach (var metaFile in files.Where(x => x.EndsWith(SaveMetadata.MetaSuffix)))
                 saveMetadatas.Add(SaveMetadata.LoadFrom(metaFile));
         }
@@ -44,18 +28,20 @@ namespace Bodardr.Saving
             if (CurrentSave != null)
                 Debug.LogWarning("A save has already been loaded, make sure you've dumped the save file first.");
 
-            CurrentSave = new SaveFile(fileName);
+            if (string.IsNullOrEmpty(fileName))
+                fileName = Guid.NewGuid().ToString();
 
-            foreach (var saveable in saveableTypes)
-            {
-                var instance = Activator.CreateInstance(saveable);
-                CurrentSave.SavedEntries.Add(saveable, instance);
-            }
+            CurrentSave = new SaveFile(fileName);
+        }
+
+        public static void LoadSave(SaveMetadata metadata)
+        {
+            CurrentSave = SaveFile.Load(metadata);
         }
 
         public static bool Exists(string filePath)
         {
-            return File.Exists(filePath);
+            return File.Exists(Path.Combine(Application.persistentDataPath,filePath));
         }
     }
 }

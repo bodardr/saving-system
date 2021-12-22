@@ -1,16 +1,16 @@
 {
-  "name": "com.bodardr.saving",
-  "rootNamespace": "Bodardr.Saving",
-  "references": [
-    "com.bodardr.databinding.runtime"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [],
-  "noEngineReferences": false
+    "name": "com.bodardr.saving",
+    "rootNamespace": "Bodardr.Saving",
+    "references": [
+        "com.bodardr.databinding.runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
