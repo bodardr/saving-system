@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Principal;
 using System.Text;
 using UnityEngine;
 
@@ -65,7 +66,9 @@ namespace Bodardr.Saving
 
         private static Sprite LoadThumbnail(string serializedTextureObject)
         {
-            if (string.IsNullOrEmpty(serializedTextureObject) || serializedTextureObject.Equals("\r\n"))
+            serializedTextureObject = serializedTextureObject.Trim('\n', '\r');
+            
+            if (string.IsNullOrEmpty(serializedTextureObject))
                 return null;
             
             var serializedTex = JsonUtility.FromJson<SerializedTexture>(serializedTextureObject);

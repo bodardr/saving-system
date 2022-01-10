@@ -30,7 +30,7 @@ namespace Bodardr.Saving
             try
             {
                 var file = File.ReadAllText(Path.Combine(Application.persistentDataPath, metadata.Filename))
-                    .Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                    .Split(new[] { '\u241E' }, StringSplitOptions.RemoveEmptyEntries);
                 
                 //Parse saveables found in file.
                 for (var i = 0; i < file.GetLength(0); i++)
@@ -108,7 +108,7 @@ namespace Bodardr.Saving
             var str = new StringBuilder();
             foreach (var entry in SavedEntries)
             {
-                str.AppendLine($"\\{entry.Key.AssemblyQualifiedName}\r");
+                str.AppendLine($"\u241E{entry.Key.AssemblyQualifiedName}\r");
                 str.AppendLine(JsonUtility.ToJson(entry.Value));
             }
 
