@@ -31,7 +31,7 @@ namespace Bodardr.Saving
             {
                 var file = File.ReadAllText(Path.Combine(Application.persistentDataPath, metadata.Filename))
                     .Split(new[] { '\u241E' }, StringSplitOptions.RemoveEmptyEntries);
-                
+
                 //Parse saveables found in file.
                 for (var i = 0; i < file.GetLength(0); i++)
                 {
@@ -44,7 +44,7 @@ namespace Bodardr.Saving
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Debug.LogError(e);
                 return null;
             }
 
@@ -98,7 +98,7 @@ namespace Bodardr.Saving
             return instance;
         }
 
-        public void Save(string saveAs = "", bool saveThumbnail = true)
+        public void Save(string saveAs = "", bool saveThumbnail = false)
         {
             if (!string.IsNullOrEmpty(saveAs))
                 Metadata.Filename = saveAs;
@@ -106,20 +106,20 @@ namespace Bodardr.Saving
             Metadata.Save(saveThumbnail);
 
             var str = new StringBuilder();
-            foreach (var entry in SavedEntries)
+            foreach (var (key, value) in SavedEntries)
             {
-                str.AppendLine($"\u241E{entry.Key.AssemblyQualifiedName}\r");
-                str.AppendLine(JsonUtility.ToJson(entry.Value));
+                str.AppendLine($"\u241E{key.AssemblyQualifiedName}\r");
+                str.AppendLine(JsonUtility.ToJson(value));
             }
 
             var filePath = Path.Combine(Application.persistentDataPath, Metadata.Filename);
 
             FileStream saveFile;
-            saveFile = File.Exists(filePath) ? File.OpenWrite(filePath) : File.Create(filePath);
-
-            var bytes = Encoding.Default.GetBytes(str.ToString());
-
-            saveFile.Write(bytes, 0, bytes.Length);
+            using (saveFile = File.Exists(filePath) ? File.OpenWrite(filePath) : File.Create(filePath))
+            {
+                var bytes = Encoding.Default.GetBytes(str.ToString());
+                saveFile.Write(bytes, 0, bytes.Length);
+            }
         }
 
         public IEnumerator GetEnumerator()

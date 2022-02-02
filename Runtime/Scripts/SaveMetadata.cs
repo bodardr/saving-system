@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.Principal;
 using System.Text;
 using UnityEngine;
 
@@ -104,14 +102,15 @@ namespace Bodardr.Saving
 
             var filePath = Path.Combine(Application.persistentDataPath, Filename) + MetaSuffix;
 
-            FileStream fileStream;
+            FileStream fileStream = null;
             try
             {
                 fileStream = File.Exists(filePath) ? File.OpenWrite(filePath) : File.Create(filePath);
             }
             catch (IOException io)
             {
-                Debug.Log($"Sharing violation : {io.Message}");
+                Debug.LogError($"Sharing violation : {io.Message}");
+                fileStream?.Close();
                 throw;
             }
 
