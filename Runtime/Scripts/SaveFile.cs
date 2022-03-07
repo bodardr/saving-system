@@ -38,8 +38,12 @@ namespace Bodardr.Saving
                     var obj = file[i].Split(new[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
                     var type = Type.GetType(obj[0]);
+                    var loadedObj = JsonUtility.FromJson(obj[1], type);
 
-                    save.SavedEntries.Add(type ?? typeof(object), JsonUtility.FromJson(obj[1], type));
+                    if (typeof(ISaveable).IsAssignableFrom(type))
+                        ((ISaveable)loadedObj).OnLoad();
+
+                    save.SavedEntries.Add(type ?? typeof(object), loadedObj);
                 }
             }
             catch (Exception e)
@@ -94,6 +98,9 @@ namespace Bodardr.Saving
                 return (T)SavedEntries[type];
 
             T instance = Activator.CreateInstance<T>();
+            if (typeof(ISaveable).IsAssignableFrom(type))
+                ((ISaveable)instance).OnLoad();
+
             SavedEntries.Add(type, instance);
             return instance;
         }
@@ -105,9 +112,13 @@ namespace Bodardr.Saving
 
             Metadata.Save(saveThumbnail);
 
+            var saveableType = typeof(ISaveable);
             var str = new StringBuilder();
             foreach (var (key, value) in SavedEntries)
             {
+                if (saveableType.IsAssignableFrom(key))
+                    ((ISaveable)value).OnBeforeSave();
+                
                 str.AppendLine($"\u241E{key.AssemblyQualifiedName}\r");
                 str.AppendLine(JsonUtility.ToJson(value));
             }
