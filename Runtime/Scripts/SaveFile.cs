@@ -38,6 +38,19 @@ namespace Bodardr.Saving
                     var obj = file[i].Split(new[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
                     var type = Type.GetType(obj[0]);
+
+                    if (type == null)
+                    {
+                        Debug.LogWarning($"Couldn't find type {obj[0]}, continuing load...");
+                        continue;
+                    } 
+                    
+                    if (save.SavedEntries.ContainsKey(type))
+                    {
+                        Debug.LogWarning($"{obj[0]} is a duplicate and was already loaded, continuing load");
+                        continue;
+                    }
+
                     var loadedObj = JsonUtility.FromJson(obj[1], type);
 
                     if (typeof(ISaveable).IsAssignableFrom(type))
@@ -118,7 +131,7 @@ namespace Bodardr.Saving
             {
                 if (saveableType.IsAssignableFrom(key))
                     ((ISaveable)value).OnBeforeSave();
-                
+
                 str.AppendLine($"\u241E{key.AssemblyQualifiedName}\r");
                 str.AppendLine(JsonUtility.ToJson(value));
             }
