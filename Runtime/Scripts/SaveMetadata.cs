@@ -119,7 +119,7 @@ namespace Bodardr.Saving
             fileStream.Write(bytes, 0, bytes.Length);
             fileStream.Close();
         }
-
+        
         public void CaptureThumbnail()
         {
             thumbnail = Sprite.Create(ScreenCapture.CaptureScreenshotAsTexture(),
