@@ -98,15 +98,7 @@ namespace Bodardr.Saving
         public T GetOrCreate<T>()
         {
             var type = typeof(T);
-
-            var saveableAttr = type.GetCustomAttribute(typeof(SaveableAttribute));
-
-            if (saveableAttr == null)
-            {
-                Debug.LogError("Type does not contain the Saveable attribute.");
-                return default;
-            }
-
+            
             if (SavedEntries.ContainsKey(type) && SavedEntries[type] != null)
                 return (T)SavedEntries[type];
 

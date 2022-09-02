@@ -2,7 +2,7 @@
 {
     public interface ISaveable
     {
-        void OnLoad();
         void OnBeforeSave();
+        void OnLoad();
     }
 }
