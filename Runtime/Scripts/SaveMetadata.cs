@@ -65,10 +65,10 @@ namespace Bodardr.Saving
         private static Sprite LoadThumbnail(string serializedTextureObject)
         {
             serializedTextureObject = serializedTextureObject.Trim('\n', '\r');
-            
+
             if (string.IsNullOrEmpty(serializedTextureObject))
                 return null;
-            
+
             var serializedTex = JsonUtility.FromJson<SerializedTexture>(serializedTextureObject);
 
             var tex = new Texture2D(serializedTex.Width, serializedTex.Height);
@@ -84,7 +84,7 @@ namespace Bodardr.Saving
 
             var str = new StringBuilder();
 
-            if (saveThumbnail && Thumbnail == null)
+            if (saveThumbnail && !Thumbnail)
                 CaptureThumbnail();
 
             //Append dates
@@ -110,8 +110,11 @@ namespace Bodardr.Saving
             catch (IOException io)
             {
                 Debug.LogError($"Sharing violation : {io.Message}");
-                fileStream?.Close();
                 throw;
+            }
+            finally
+            {
+                fileStream?.Close();
             }
 
             var bytes = Encoding.Default.GetBytes(str.ToString());
@@ -119,7 +122,7 @@ namespace Bodardr.Saving
             fileStream.Write(bytes, 0, bytes.Length);
             fileStream.Close();
         }
-        
+
         public void CaptureThumbnail()
         {
             thumbnail = Sprite.Create(ScreenCapture.CaptureScreenshotAsTexture(),
