@@ -102,25 +102,19 @@ namespace Bodardr.Saving
 
             var filePath = Path.Combine(Application.persistentDataPath, Filename) + MetaSuffix;
 
-            FileStream fileStream = null;
             try
             {
-                fileStream = File.Exists(filePath) ? File.OpenWrite(filePath) : File.Create(filePath);
+                using var fileStream = File.Exists(filePath) ? File.OpenWrite(filePath) : File.Create(filePath);
+                var bytes = Encoding.Default.GetBytes(str.ToString());
+
+                fileStream.Write(bytes, 0, bytes.Length);
+                fileStream.Close();
             }
             catch (IOException io)
             {
                 Debug.LogError($"Sharing violation : {io.Message}");
                 throw;
             }
-            finally
-            {
-                fileStream?.Close();
-            }
-
-            var bytes = Encoding.Default.GetBytes(str.ToString());
-
-            fileStream.Write(bytes, 0, bytes.Length);
-            fileStream.Close();
         }
 
         public void CaptureThumbnail()
